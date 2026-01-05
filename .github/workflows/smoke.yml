@@ -1,0 +1,55 @@
+name: PR smoke (pushgateway build + docker run)
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Build binary
+        run: |
+          set -euo pipefail
+          make build
+          test -f ./pushgateway
+
+      - name: Prepare binary for Dockerfile COPY
+        run: |
+          set -euo pipefail
+          mkdir -p .build/linux-amd64
+          cp -f ./pushgateway .build/linux-amd64/pushgateway
+
+      - name: Docker build
+        run: |
+          set -euo pipefail
+          docker build -t pushgateway-pr:${GITHUB_SHA} .
+
+      - name: Docker run + smoke check
+        run: |
+          set -euo pipefail
+
+          cleanup() {
+            docker logs pushgateway-smoke 2>/dev/null || true
+            docker stop pushgateway-smoke 2>/dev/null || true
+          }
+          trap cleanup EXIT
+
+          docker run -d --rm --name pushgateway-smoke -p 19091:9091 \
+            pushgateway-pr:${GITHUB_SHA}
+
+          sleep 5
+          curl -f http://127.0.0.1:19091/-/healthy
