@@ -1,8 +1,8 @@
 module github.com/prometheus/pushgateway
 
-go 1.24.0
+go 1.25.0
 
-toolchain go1.24.1
+toolchain go1.25.5
 
 require (
 	github.com/alecthomas/kingpin/v2 v2.4.0
