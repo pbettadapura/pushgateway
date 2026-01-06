@@ -53,3 +53,11 @@ jobs:
 
           sleep 5
           curl -f http://127.0.0.1:19091/-/healthy
+
+      - name: Trivy image scan
+        uses: aquasecurity/trivy-action@0.33.1
+        with:
+          image-ref: pushgateway-pr:${{ github.sha }}
+          format: "table"
+          scanners: "vuln"
+          exit-code: '0'
