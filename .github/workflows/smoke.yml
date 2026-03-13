@@ -2,6 +2,9 @@ name: PR smoke (pushgateway build + docker run)
 
 on:
   pull_request:
+  push:
+    branches:
+      - auto/update-go-toolchain
 
 permissions:
   contents: read
