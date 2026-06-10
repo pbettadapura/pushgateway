@@ -1,0 +1,6 @@
+FROM golang:1.25-bookworm AS build
+WORKDIR /src
+COPY . /src
+RUN go build -o pushgateway .
+FROM debian:bookworm-slim
+COPY --from=build /src/pushgateway /bin/pushgateway
