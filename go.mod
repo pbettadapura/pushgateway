@@ -2,8 +2,6 @@ module github.com/prometheus/pushgateway
 
 go 1.26.0
 
-toolchain go1.26.0
-
 require (
 	github.com/alecthomas/kingpin/v2 v2.4.0
 	github.com/golang/protobuf v1.5.4
