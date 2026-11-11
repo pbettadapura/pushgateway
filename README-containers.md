@@ -50,8 +50,8 @@ Download binary releases for your platform from the
 [release page](https://github.com/prometheus/pushgateway/releases) and unpack
 the tarball.
 
-If you want to compile yourself from the sources, you need a working Go
-setup. Then use the provided Makefile (type `make`).
+If you want to compile yourself from the sources, you need Go 1.26.9 or a
+newer patched release. Then use the provided Makefile (type `make`).
 
 For the most basic setup, just start the binary. To change the address
 to listen on, use the `--web.listen-address` flag (e.g. "0.0.0.0:9091" or ":9091").

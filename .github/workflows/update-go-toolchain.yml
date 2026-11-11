@@ -20,10 +20,9 @@ jobs:
         id: current
         run: |
           set -euo pipefail
-          # Read the toolchain directive from the root go.mod
-          CURRENT=$(grep '^toolchain ' go.mod | awk '{print $2}' | sed 's/^go//')
+          CURRENT=$(awk '/^toolchain / { sub(/^go/, "", $2); toolchain=$2 } /^go / { version=$2 } END { print (toolchain ? toolchain : version) }' go.mod)
           if [ -z "${CURRENT}" ]; then
-            echo "::error::No toolchain directive found in go.mod"
+            echo "::error::No Go version found in go.mod"
             exit 1
           fi
           echo "version=${CURRENT}" >> "$GITHUB_OUTPUT"
@@ -73,13 +72,15 @@ jobs:
         run: |
           set -euo pipefail
           LATEST="${{ steps.latest.outputs.version }}"
-          echo "Updating all go.mod toolchain directives to go${LATEST}"
+          echo "Updating all go.mod Go versions to ${LATEST}"
 
-          # Find every go.mod in the repo that has a toolchain directive
           find . -name 'go.mod' -type f | while read -r modfile; do
             if grep -q '^toolchain ' "${modfile}"; then
               echo "  Updating ${modfile}"
               sed -i "s/^toolchain go.*/toolchain go${LATEST}/" "${modfile}"
+            else
+              echo "  Updating Go version in ${modfile}"
+              sed -i "s/^go .*/go ${LATEST}/" "${modfile}"
             fi
           done
 
@@ -101,7 +102,7 @@ jobs:
 
             Updated files:
             ```
-            find . -name 'go.mod' -exec grep -l '^toolchain ' {} \;
+            find . -name 'go.mod' -exec grep -El '^(go|toolchain) ' {} \;
             ```
 
             Release notes: https://go.dev/doc/devel/release#go${{ steps.latest.outputs.version }}
